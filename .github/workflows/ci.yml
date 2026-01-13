@@ -109,7 +109,7 @@ jobs:
         run: npm test -- --coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -118,5 +118,4 @@ jobs:
             -Dsonar.organization=enzomarion
             -Dsonar.projectName=WorkflowGit
             -Dsonar.sources=backend/src
-            -Dsonar.tests=backend/test
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
