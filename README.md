@@ -1,3 +1,5 @@
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=EnzoMarion_WorkflowGit)](https://sonarcloud.io/summary/new_code?id=EnzoMarion_WorkflowGit)
+
 # Gym Management System
 
 A complete fullstack gym management application built with modern web technologies.
@@ -300,4 +302,4 @@ The `CI` workflow runs on our self-hosted runner and executes the following jobs
     - Uses the `SONAR_TOKEN` secret to authenticate against SonarCloud
     - Will be used as a Quality Gate to block non-compliant PRs
 
-All CI jobs run with `runs-on: self-hosted`, using the local runner configured on the developer machine.
+All CI jobs (lint, build, tests) run on the self-hosted runner, while the SonarCloud analysis job runs on a GitHub-hosted Linux runner.
