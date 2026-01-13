@@ -274,3 +274,30 @@ The following Husky hooks are configured at the repository level:
 - `pre-push`
    - Runs the frontend build (`npm run build:front`) and a minimal backend build check (`npm run build:back`).
    - Blocks the push if the project is unstable (failing build), to avoid pushing broken code to the remote repository.
+
+
+## 🚀 Continuous Integration (CI)
+
+This project uses a self-hosted GitHub Actions runner to run the CI pipeline on every push to `feature` branches and on pull requests targeting `develop`.
+
+### CI pipeline
+
+The `CI` workflow runs on our self-hosted runner and executes the following jobs:
+
+- **Lint**
+    - `frontend`: `npm run lint`
+    - `backend`: `npm run lint`
+
+- **Build**
+    - `frontend`: `npm run build`
+    - `backend`: `npm run build`
+
+- **Tests (backend)**
+    - `backend`: `npm test` (NestJS tests)
+
+- **SonarCloud (backend)**
+    - Static code analysis of the NestJS backend
+    - Uses the `SONAR_TOKEN` secret to authenticate against SonarCloud
+    - Will be used as a Quality Gate to block non-compliant PRs
+
+All CI jobs run with `runs-on: self-hosted`, using the local runner configured on the developer machine.
