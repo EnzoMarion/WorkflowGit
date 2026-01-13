@@ -89,8 +89,6 @@ jobs:
     name: SonarCloud analysis (backend)
     runs-on: self-hosted
     needs: test
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -111,12 +109,14 @@ jobs:
         run: npm test -- --coverage
 
       - name: SonarCloud Scan
-        working-directory: backend
-        run: |
-          npx sonar-scanner \
-            -Dsonar.projectKey=EnzoMarion_WorkflowGit \
-            -Dsonar.organization=enzomarion \
-            -Dsonar.sources=src \
-            -Dsonar.tests=test \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.host.url=https://sonarcloud.io
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=EnzoMarion_WorkflowGit
+            -Dsonar.organization=enzomarion
+            -Dsonar.projectName=WorkflowGit
+            -Dsonar.sources=backend/src
+            -Dsonar.tests=backend/test
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
