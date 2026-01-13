@@ -106,12 +106,17 @@ jobs:
         working-directory: backend
         run: npm install
 
+      - name: Run tests with coverage
+        working-directory: backend
+        run: npm test -- --coverage
+
       - name: SonarCloud Scan
         working-directory: backend
         run: |
           npx sonar-scanner \
-            -Dsonar.projectKey=YOUR_PROJECT_KEY \
-            -Dsonar.organization=YOUR_ORG_KEY \
+            -Dsonar.projectKey=EnzoMarion_WorkflowGit \
+            -Dsonar.organization=enzomarion \
             -Dsonar.sources=src \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.tests=test \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.host.url=https://sonarcloud.io
