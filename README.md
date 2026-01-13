@@ -238,4 +238,39 @@ This project is licensed under the MIT License.
 ## Support
 
 For support or questions, please open an issue in the repository.
-test3
+
+## 🔧 Git Workflow & DevOps (TP1)
+
+### Git rules
+
+- Main branches: `main` (production) and `develop` (integration).
+- Feature branches: `feature/<name>` (e.g. `feature/init-husky`).
+- No direct commits on `main` or `develop`.
+- All changes go through a Pull Request from a `feature/*` branch into `develop`.
+
+### Commit convention
+
+This project follows the **Conventional Commits** specification for all commit messages.  
+Examples of valid messages:
+
+- `feat: add authentication`
+- `fix: fix postgres connection`
+- `chore: update nestjs dependencies`
+
+The allowed types include: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
+
+### Git hooks (Husky)
+
+The following Husky hooks are configured at the repository level:
+
+- `pre-commit`
+   - Runs a secrets scan (`npm run secrets:check` using gitleaks) to prevent leaking keys or tokens.
+   - Runs the global lint (`npm run lint:all`), which calls the `lint` scripts in the frontend and backend.
+
+- `commit-msg`
+   - Validates the commit message format with Commitlint.
+   - Rejects commits that do not follow the Conventional Commits convention.
+
+- `pre-push`
+   - Runs the frontend build (`npm run build:front`) and a minimal backend build check (`npm run build:back`).
+   - Blocks the push if the project is unstable (failing build), to avoid pushing broken code to the remote repository.
