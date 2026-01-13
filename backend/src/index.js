@@ -51,14 +51,3 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
-
-// BAD CODE ONLY FOR SONARCLOUD TEST
-function duplicatedLogicForSonarTest(a: number, b: number): number {
-  const result = a + b;
-  return result;
-}
-
-function duplicatedLogicForSonarTestCopy(a: number, b: number): number {
-  const result = a + b;
-  return result;
-}
