@@ -10,7 +10,8 @@
     "prisma:migrate": "npx prisma migrate deploy",
     "prisma:push": "npx prisma db push",
     "db:setup": "npx prisma generate && npx prisma migrate deploy",
-    "lint": "echo \"lint backend\""
+    "lint": "echo \"lint backend\"",
+    "build": "echo \"build backend\""
   },
   "dependencies": {
     "express": "^4.18.2",
