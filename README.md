@@ -1,3 +1,4 @@
+[![CI](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml)
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=EnzoMarion_WorkflowGit)](https://sonarcloud.io/summary/new_code?id=EnzoMarion_WorkflowGit)
 
 # Gym Management System
@@ -280,26 +281,26 @@ The following Husky hooks are configured at the repository level:
 
 ## 🚀 Continuous Integration (CI)
 
-This project uses a self-hosted GitHub Actions runner to run the CI pipeline on every push to `feature` branches and on pull requests targeting `develop`.
+This project uses continuous integration to validate every change on feature branches and pull requests targeting `develop`.
 
 ### CI pipeline
 
-The `CI` workflow runs on our self-hosted runner and executes the following jobs:
+The `CI` workflow is composed of four jobs:
 
-- **Lint**
+- **Job 1 – Lint (frontend & backend)**
     - `frontend`: `npm run lint`
     - `backend`: `npm run lint`
 
-- **Build**
+- **Job 2 – Build (frontend & backend)**
     - `frontend`: `npm run build`
     - `backend`: `npm run build`
 
-- **Tests (backend)**
-    - `backend`: `npm test` (NestJS tests)
+- **Job 3 – Tests (backend)**
+    - `backend`: `npm test`
 
-- **SonarCloud (backend)**
-    - Static code analysis of the NestJS backend
-    - Uses the `SONAR_TOKEN` secret to authenticate against SonarCloud
-    - Will be used as a Quality Gate to block non-compliant PRs
+- **Job 4 – SonarCloud (backend)**
+    - Static code analysis of the backend sources
+    - Uses the `SONAR_TOKEN` repository secret to authenticate against SonarCloud
+    - SonarCloud **Quality Gate** is required to pass before merging into `develop`
 
-All CI jobs (lint, build, tests) run on the self-hosted runner, while the SonarCloud analysis job runs on a GitHub-hosted Linux runner.
+All lint, build and test jobs run on the self-hosted Windows runner, while the SonarCloud analysis job runs on a GitHub-hosted Ubuntu runner (required for the container-based scanner).
