@@ -153,8 +153,8 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
-          docker stop backend-ci
-          docker stop frontend-ci
+          docker stop backend-ci || echo "no backend-ci"
+          docker stop frontend-ci || echo "no frontend-ci"
         continue-on-error: true
 
       - name: Tag backend image
@@ -192,8 +192,11 @@ jobs:
 
       - name: Stop stray postgres container if exists
         run: |
-          docker stop postgres || echo "postgres not running"
-          docker rm postgres || echo "postgres not found"
+          $container = docker ps -a --format "{{.Names}}" | Select-String -SimpleMatch "postgres"
+          if ($container) {
+            docker stop postgres
+            docker rm postgres
+          }
 
       - name: Stop current stack
         run: docker compose down
