@@ -119,3 +119,48 @@ jobs:
             -Dsonar.projectName=WorkflowGit
             -Dsonar.sources=backend/src
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+
+  docker-images:
+    name: Build & push Docker images
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u EnzoMarion --password-stdin
+
+      - name: Build backend image
+        run: docker build -t backend-ci ./backend
+
+      - name: Build frontend image
+        run: docker build -t frontend-ci ./frontend
+
+      - name: Run backend container (healthcheck)
+        run: docker run -d --rm --name backend-ci -p 3000:3000 backend-ci
+
+      - name: Run frontend container (healthcheck)
+        run: docker run -d --rm --name frontend-ci -p 8080:80 frontend-ci
+
+      - name: Check backend health
+        run: |
+          curl -f http://localhost:3000/health
+
+      - name: Stop containers
+        if: always()
+        run: |
+          docker stop backend-ci || true
+          docker stop frontend-ci || true
+
+      - name: Tag backend image
+        run: docker tag backend-ci ghcr.io/EnzoMarion/cloudnative-backend:${{ github.sha }}
+
+      - name: Tag frontend image
+        run: docker tag frontend-ci ghcr.io/EnzoMarion/cloudnative-frontend:${{ github.sha }}
+
+      - name: Push backend image
+        run: docker push ghcr.io/EnzoMarion/cloudnative-backend:${{ github.sha }}
+
+      - name: Push frontend image
+        run: docker push ghcr.io/EnzoMarion/cloudnative-frontend:${{ github.sha }}
