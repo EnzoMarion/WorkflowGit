@@ -147,8 +147,9 @@ jobs:
       - name: Run frontend container (healthcheck)
         run: docker run -d --rm --name frontend-ci -p 8080:80 frontend-ci
 
-      - name: Check backend health
-        run: curl -f http://localhost:3000/health
+      - name: Healthcheck backend
+        shell: pwsh
+        run: Invoke-WebRequest -Uri http://localhost:3000/health
 
       - name: Stop containers
         if: always()
