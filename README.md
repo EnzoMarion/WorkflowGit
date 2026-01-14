@@ -1,5 +1,7 @@
 [![CI](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml)
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=EnzoMarion_WorkflowGit)](https://sonarcloud.io/summary/new_code?id=EnzoMarion_WorkflowGit)
+[![Docker pulls backend](https://img.shields.io/badge/GHCR-backend%20image-blue?logo=docker)](https://github.com/EnzoMarion/WorkflowGit/pkgs/container/cloudnative-backend)
+[![Docker pulls frontend](https://img.shields.io/badge/GHCR-frontend%20image-blue?logo=docker)](https://github.com/EnzoMarion/WorkflowGit/pkgs/container/cloudnative-frontend)
 
 # Gym Management System
 
@@ -304,3 +306,31 @@ The `CI` workflow is composed of four jobs:
     - SonarCloud **Quality Gate** is required to pass before merging into `develop`
 
 All lint, build and test jobs run on the self-hosted Windows runner, while the SonarCloud analysis job runs on a GitHub-hosted Ubuntu runner (required for the container-based scanner).
+
+# 📁 Part 4 – Docker & CI Usage
+
+## 🚀 Running the application with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+## 🌍 Accessible URLs
+
+- Frontend: http://localhost:8080/login
+- Backend API: http://localhost:3000/health
+- PostgreSQL: Available locally inside Docker
+
+## 🐳 Docker Images
+
+- Backend: `ghcr.io/EnzoMarion/cloudnative-backend:latest`
+
+- Frontend: `ghcr.io/EnzoMarion/cloudnative-frontend:latest`
+
+## ⚙️ CI Pipeline Execution Conditions
+
+- Requires a self-hosted runner
+- Requires the following secrets:
+    - DOCKER_USERNAME
+    - DOCKER_PASSWORD
+    - SONAR_TOKEN
