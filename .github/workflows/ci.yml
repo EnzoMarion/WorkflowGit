@@ -200,5 +200,5 @@ jobs:
         run: cp frontend/.env.example frontend/.env
 
       - name: Deploy stack via script
-        run: pwsh ./scripts/deploy.ps1 -Sha "${{ github.sha }}"
+        run: powershell -File ./scripts/deploy.ps1 -Sha "${{ github.sha }}"
 
