@@ -187,6 +187,9 @@ jobs:
       - name: Prepare backend env file
         run: cp backend/.env.example backend/.env
 
+      - name: Prepare frontend env file
+        run: cp frontend/.env.example frontend/.env
+
       - name: Stop current stack
         run: docker compose down
 
