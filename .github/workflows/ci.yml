@@ -158,13 +158,13 @@ jobs:
         continue-on-error: true
 
       - name: Tag backend image
-        run: docker tag backend-ci ghcr.io/EnzoMarion/cloudnative-backend:${{ github.sha }}
+        run: docker tag backend-ci ghcr.io/enzomarion/cloudnative-backend:${{ github.sha }}
 
       - name: Tag frontend image
-        run: docker tag frontend-ci ghcr.io/EnzoMarion/cloudnative-frontend:${{ github.sha }}
+        run: docker tag frontend-ci ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
 
       - name: Push backend image
-        run: docker push ghcr.io/EnzoMarion/cloudnative-backend:${{ github.sha }}
+        run: docker push ghcr.io/enzomarion/cloudnative-backend:${{ github.sha }}
 
       - name: Push frontend image
-        run: docker push ghcr.io/EnzoMarion/cloudnative-frontend:${{ github.sha }}
+        run: docker push ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
