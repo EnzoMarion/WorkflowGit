@@ -190,6 +190,11 @@ jobs:
       - name: Prepare frontend env file
         run: cp frontend/.env.example frontend/.env
 
+      - name: Stop stray postgres container if exists
+        run: |
+          docker stop postgres || echo "postgres not running"
+          docker rm postgres || echo "postgres not found"
+
       - name: Stop current stack
         run: docker compose down
 
