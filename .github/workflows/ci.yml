@@ -135,6 +135,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
 
+      - name: Remove old healthcheck containers
+        run: |
+          $names = @("backend-ci", "frontend-ci")
+          foreach ($name in $names) {
+            $container = docker ps -a --format "{{.Names}}" | Select-String -SimpleMatch $name
+            if ($container) {
+              docker rm -f $name
+            }
+          }
+
       - name: Build backend image
         run: docker build -t backend-ci ./backend
 
@@ -170,6 +180,7 @@ jobs:
         run: docker push ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
 
   deploy:
+    name: Deploy Docker Compose stack
     runs-on: self-hosted
     needs: docker-images
     steps:
