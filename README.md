@@ -333,3 +333,43 @@ docker compose up --build
 - Requires the following secrets:
     - CR_PAT (GitHub Container Registry access token)
     - SONAR_TOKEN (SonarCloud)
+
+## 🔄 Déploiement local automatisé
+
+Le projet dispose d’un déploiement **automatisé en local** piloté par GitHub Actions et un runner self‑hosted Windows.
+
+### Fonctionnement du stage de déploiement
+
+- Le pipeline CI suit la chaîne suivante :  
+  `lint → build → test → Sonar → build images → push registry → deploy`.
+- Quand les images Docker backend et frontend sont construites et poussées avec succès vers GitHub Container Registry (`ghcr.io`), un **stage de déploiement** est déclenché.
+- Ce stage n’exécute pas directement les commandes Docker dans le workflow : toute la logique de déploiement est centralisée dans le script `scripts/deploy.ps1`.
+- Le script :
+    - arrête la stack Docker Compose courante (`docker compose down`) sans supprimer les volumes ;
+    - supprime les anciens conteneurs `postgres`, `backend`, `frontend` s’ils existent encore ;
+    - libère le port 3000 si un autre conteneur l’utilise ;
+    - tire les images `cloudnative-backend` et `cloudnative-frontend` taggées avec le `GITHUB_SHA` du commit ;
+    - redémarre toute la stack via `docker compose up -d`.
+
+Le déploiement est **idempotent** : il peut être relancé autant de fois que nécessaire, la stack est mise à jour et les données Postgres sont conservées.
+
+### Conditions nécessaires
+
+Pour que le déploiement automatique fonctionne, il faut :
+
+- **Un runner local actif**  
+  Un runner GitHub Actions self‑hosted (Windows) configuré sur la machine qui héberge Docker.
+
+- **Des secrets Docker configurés**  
+  Le secret `CR_PAT` doit contenir un Personal Access Token GitHub avec les droits nécessaires pour pousser et tirer des images sur GitHub Container Registry.
+
+- **Un accès au registre distant**  
+  Le runner doit pouvoir se connecter à `ghcr.io` pour tirer les images backend et frontend taggées avec le SHA du commit.
+
+### Branches avec déploiement actif
+
+Dans le cadre de ce TP, le déploiement automatique est actif **uniquement sur la branche** :
+
+- `feature/cd-deployment`
+
+Les autres branches déclenchent la CI (lint / build / tests / Sonar), mais **ne lancent pas** le stage de déploiement Docker Compose.
