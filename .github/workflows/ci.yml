@@ -180,7 +180,6 @@ jobs:
         run: docker push ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
 
   deploy:
-    name: Deploy Docker Compose stack
     runs-on: self-hosted
     needs: docker-images
     steps:
@@ -200,24 +199,6 @@ jobs:
       - name: Prepare frontend env file
         run: cp frontend/.env.example frontend/.env
 
-      - name: Stop current stack
-        run: docker compose down
+      - name: Deploy stack via script
+        run: pwsh ./scripts/deploy.ps1 -Sha "${{ github.sha }}"
 
-      - name: Remove old containers (postgres, backend, frontend)
-        run: |
-          $names = @("postgres", "backend", "frontend")
-          foreach ($name in $names) {
-            $container = docker ps -a --format "{{.Names}}" | Select-String -SimpleMatch $name
-            if ($container) {
-              docker rm -f $name
-            }
-          }
-
-      - name: Pull latest backend image
-        run: docker pull ghcr.io/enzomarion/cloudnative-backend:${{ github.sha }}
-
-      - name: Pull latest frontend image
-        run: docker pull ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
-
-      - name: Start stack
-        run: docker compose up -d
