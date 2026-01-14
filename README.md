@@ -331,6 +331,5 @@ docker compose up --build
 
 - Requires a self-hosted runner
 - Requires the following secrets:
-    - DOCKER_USERNAME
-    - DOCKER_PASSWORD
-    - SONAR_TOKEN
+    - CR_PAT (GitHub Container Registry access token)
+    - SONAR_TOKEN (SonarCloud)
