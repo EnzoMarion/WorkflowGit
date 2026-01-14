@@ -184,6 +184,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
 
+      - name: Prepare backend env file
+        run: cp backend/.env.example backend/.env
+
       - name: Stop current stack
         run: docker compose down
 
