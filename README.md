@@ -1,3 +1,6 @@
+[![CI](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoMarion/WorkflowGit/actions/workflows/ci.yml)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=EnzoMarion_WorkflowGit)](https://sonarcloud.io/summary/new_code?id=EnzoMarion_WorkflowGit)
+
 # Gym Management System
 
 A complete fullstack gym management application built with modern web technologies.
@@ -274,3 +277,30 @@ The following Husky hooks are configured at the repository level:
 - `pre-push`
    - Runs the frontend build (`npm run build:front`) and a minimal backend build check (`npm run build:back`).
    - Blocks the push if the project is unstable (failing build), to avoid pushing broken code to the remote repository.
+
+
+## 🚀 Continuous Integration (CI)
+
+This project uses continuous integration to validate every change on feature branches and pull requests targeting `develop`.
+
+### CI pipeline
+
+The `CI` workflow is composed of four jobs:
+
+- **Job 1 – Lint (frontend & backend)**
+    - `frontend`: `npm run lint`
+    - `backend`: `npm run lint`
+
+- **Job 2 – Build (frontend & backend)**
+    - `frontend`: `npm run build`
+    - `backend`: `npm run build`
+
+- **Job 3 – Tests (backend)**
+    - `backend`: `npm test`
+
+- **Job 4 – SonarCloud (backend)**
+    - Static code analysis of the backend sources
+    - Uses the `SONAR_TOKEN` repository secret to authenticate against SonarCloud
+    - SonarCloud **Quality Gate** is required to pass before merging into `develop`
+
+All lint, build and test jobs run on the self-hosted Windows runner, while the SonarCloud analysis job runs on a GitHub-hosted Ubuntu runner (required for the container-based scanner).
