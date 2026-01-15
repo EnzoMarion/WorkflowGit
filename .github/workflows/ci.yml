@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ develop ]
   push:
-    branches: [ feature/cd-dockerisation ]
+    branches: [ feature/cd-deployment ]
 
 jobs:
   lint:
@@ -109,16 +109,16 @@ jobs:
         run: npm test -- --coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=EnzoMarion_WorkflowGit
-            -Dsonar.organization=enzomarion
-            -Dsonar.projectName=WorkflowGit
-            -Dsonar.sources=backend/src
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+            "-Dsonar.projectKey=EnzoMarion_WorkflowGit"
+            "-Dsonar.organization=enzomarion"
+            "-Dsonar.projectName=WorkflowGit"
+            "-Dsonar.sources=backend/src"
+            "-Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info"
 
   docker-images:
     name: Build & push Docker images
@@ -134,6 +134,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
+
+      - name: Remove old healthcheck containers
+        run: |
+          $names = @("backend-ci", "frontend-ci")
+          foreach ($name in $names) {
+            $container = docker ps -a --format "{{.Names}}" | Select-String -SimpleMatch $name
+            if ($container) {
+              docker rm -f $name
+            }
+          }
 
       - name: Build backend image
         run: docker build -t backend-ci ./backend
@@ -152,9 +162,10 @@ jobs:
 
       - name: Stop containers
         if: always()
+        shell: pwsh
         run: |
-          docker stop backend-ci
-          docker stop frontend-ci
+          docker stop backend-ci 2>$null
+          docker stop frontend-ci 2>$null
         continue-on-error: true
 
       - name: Tag backend image
@@ -168,3 +179,27 @@ jobs:
 
       - name: Push frontend image
         run: docker push ghcr.io/enzomarion/cloudnative-frontend:${{ github.sha }}
+
+  deploy:
+    runs-on: self-hosted
+    needs: docker-images
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Prepare backend env file
+        run: cp backend/.env.example backend/.env
+
+      - name: Prepare frontend env file
+        run: cp frontend/.env.example frontend/.env
+
+      - name: Deploy stack via script
+        run: powershell -File ./scripts/deploy.ps1 -Sha "${{ github.sha }}"
+
