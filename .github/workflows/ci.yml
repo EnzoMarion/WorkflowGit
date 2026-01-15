@@ -109,16 +109,16 @@ jobs:
         run: npm test -- --coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=EnzoMarion_WorkflowGit
-            -Dsonar.organization=enzomarion
-            -Dsonar.projectName=WorkflowGit
-            -Dsonar.sources=backend/src
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+            "-Dsonar.projectKey=EnzoMarion_WorkflowGit"
+            "-Dsonar.organization=enzomarion"
+            "-Dsonar.projectName=WorkflowGit"
+            "-Dsonar.sources=backend/src"
+            "-Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info"
 
   docker-images:
     name: Build & push Docker images
@@ -162,9 +162,10 @@ jobs:
 
       - name: Stop containers
         if: always()
+        shell: pwsh
         run: |
-          docker stop backend-ci || echo "no backend-ci"
-          docker stop frontend-ci || echo "no frontend-ci"
+          docker stop backend-ci 2>$null
+          docker stop frontend-ci 2>$null
         continue-on-error: true
 
       - name: Tag backend image
