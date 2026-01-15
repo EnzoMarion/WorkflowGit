@@ -373,3 +373,160 @@ Dans le cadre de ce TP, le déploiement automatique est actif **uniquement sur l
 - `feature/cd-deployment`
 
 Les autres branches déclenchent la CI (lint / build / tests / Sonar), mais **ne lancent pas** le stage de déploiement Docker Compose.
+
+## 🔵🟢 Blue/Green Deployment (TP5)
+
+This project implements a **Blue/Green deployment strategy** using Docker, Docker Compose and an **Nginx reverse proxy** to allow zero-downtime deployments and instant rollback.
+
+---
+
+## 📌 Principle
+
+Blue/Green deployment means running **two identical production environments** side by side:
+
+- **Blue** → current live version (serving users)
+- **Green** → new candidate version (being deployed and tested)
+
+At any time, only **one color is exposed to users**, but both stacks can exist at the same time.
+
+This allows:
+- Deploying a new version **without stopping the current one**
+- Switching traffic instantly
+- Rolling back in seconds if something goes wrong
+
+---
+
+## 🌐 Role of the Reverse Proxy
+
+The **Nginx reverse proxy** is the single entry point for users.
+
+It:
+- Listens on `http://localhost`
+- Routes:
+    - `/` → active frontend (blue or green)
+    - `/api/*` → active backend (blue or green)
+
+The client never knows if it is talking to blue or green.  
+Only the proxy decides which color is active.
+
+[Client] --> [Reverse Proxy] --> [Frontend Blue] (active)
+-> [Frontend Green] (candidate)
+
+[Client] --> [Reverse Proxy] --> [Backend Blue] (active)
+-> [Backend Green] (candidate)
+
+Switching versions is done by **changing the proxy configuration**, not by stopping containers.
+
+---
+
+## 🧱 Architecture
+
+The system runs:
+
+- One shared **PostgreSQL**
+- One **reverse proxy**
+- Two versions of the app:
+    - `frontend-blue` + `backend-blue`
+    - `frontend-green` + `backend-green`
+
+Both blue and green connect to the same database.
+
+---
+
+## 🔄 Deployment Workflow
+
+A typical Blue/Green deployment works like this:
+
+### 1️⃣ Build & push images
+The CI pipeline:
+- Builds the frontend and backend Docker images
+- Tags them with the commit SHA
+- Pushes them to GitHub Container Registry (`ghcr.io`)
+
+---
+
+### 2️⃣ Deploy on the inactive color
+
+If **blue is currently live**, the pipeline deploys the new images on **green**:
+
+- `backend-green`
+- `frontend-green`
+
+The green stack is started **without stopping blue**.
+
+At this point:
+- Blue = production
+- Green = new version to validate
+
+Health checks and manual tests can be done on green.
+
+---
+
+### 3️⃣ Switch the reverse proxy
+
+Once green is validated, the pipeline updates the reverse proxy so that:
+
+- `/` → `frontend-green`
+- `/api/*` → `backend-green`
+
+From the user’s point of view, the switch is **instantaneous**.
+
+Only the reverse proxy configuration is changed; the blue and green containers stay running, only the proxy is reloaded.
+
+---
+
+### 4️⃣ Rollback capability
+
+If a problem is detected:
+
+The proxy is switched back to **blue**.
+
+Because blue is still running:
+- No rebuild
+- No redeploy
+- No downtime
+
+Rollback takes only a few seconds.
+
+---
+
+## ⚙️ Automation in CI
+
+The Blue/Green logic is fully automated by the **local GitHub Actions runner**.
+
+- A dedicated **blue-green-deploy stage** runs only on the deployment branch  
+  (for example: `main` or `feature/cd-deployment`)
+- Feature branches run CI but **cannot switch production**
+
+The deployment script:
+1. Detects the **currently active color**
+2. Deploys the new images on the **other color**
+3. Updates the reverse proxy configuration
+4. Reloads Nginx
+5. Keeps the previous color available for rollback
+
+The active color is stored in a shared configuration file used by the proxy and the deployment script.
+
+---
+
+## 🧪 Why this is safe
+
+This strategy guarantees that:
+
+- A new version is never exposed to users before being deployed
+- The old version is always available
+- Switching and rollback are fast and reliable
+- The database is preserved
+
+This makes the deployment:
+- **Idempotent**
+- **Zero-downtime**
+- **Production-grade**
+
+---
+
+## 📝 Example summary
+
+> The `blue-green-deploy` job runs only on the deployment branch.  
+> It deploys the new images on the inactive color, then updates the reverse proxy to route all traffic to this color.  
+> If something goes wrong, the job can be re-run with the previous color to perform an immediate rollback.
