@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ develop ]
   push:
-    branches: [ feature/cd-deployment ]
+    branches: [ feature/monitoring ]
 
 jobs:
   lint:
@@ -136,6 +136,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Remove old healthcheck containers
+        shell: pwsh
         run: |
           $names = @("backend-ci", "frontend-ci")
           foreach ($name in $names) {
@@ -152,13 +153,13 @@ jobs:
         run: docker build -t frontend-ci ./frontend
 
       - name: Run backend container (healthcheck)
-        run: docker run -d --rm --name backend-ci -p 3000:3000 backend-ci
+        run: docker run -d --rm --name backend-ci -p 3300:3000 backend-ci
 
       - name: Run frontend container (healthcheck)
-        run: docker run -d --rm --name frontend-ci -p 8080:80 frontend-ci
+        run: docker run -d --rm --name frontend-ci -p 8180:80 frontend-ci
 
       - name: Healthcheck backend
-        run: curl http://localhost:3000/health
+        run: curl http://localhost:3300/health
 
       - name: Stop containers
         if: always()
